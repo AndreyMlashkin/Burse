@@ -10,6 +10,8 @@ public:
     Transaction();
     Transaction(qreal _cost, qreal _volume, Type _type);
 
+    bool isValid() const;
+
     inline qreal cost()   const {return m_cost;}
     inline qreal volume() const {return m_volume;}
     inline Type type()    const {return m_type;}
