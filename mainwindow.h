@@ -10,6 +10,7 @@ namespace Ui
 
 class TransactionProcessor;
 class Transaction;
+class QCustomPlot;
 
 class MainWindow : public QMainWindow
 {
@@ -25,9 +26,12 @@ private slots:
 private:
     Transaction* formTransaction() const;
 
+    void initGraphics();
+
 private:
     Ui::MainWindow *m_ui;
     TransactionProcessor* m_processor;
+    QCustomPlot* m_plotter;
 };
 
 #endif // MAINWINDOW_H
