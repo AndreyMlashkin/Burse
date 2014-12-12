@@ -38,8 +38,6 @@ void TransactionProcessor::process(Transaction *_transaction)
         return;
     }
 
-    // !!! It seems, that comparator function need to compare in case of buy and sell. !!!
-
     while(!queueToProcess->isEmpty() && comparator(*queueToProcess->first(), *_transaction))
     {
         qreal transationVolume = _transaction->volume();

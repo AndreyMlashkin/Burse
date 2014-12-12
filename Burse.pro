@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -15,10 +15,12 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
         transaction.cpp \
-        transactionprocessor.cpp
+        transactionprocessor.cpp \
+        qcustomplot/qcustomplot.cpp
 
 HEADERS  += mainwindow.h \
         transaction.h  \
-        transactionprocessor.h
+        transactionprocessor.h \
+        qcustomplot/qcustomplot.h
 
 FORMS    += mainwindow.ui
