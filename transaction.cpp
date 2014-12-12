@@ -17,3 +17,8 @@ bool Transaction::isValid() const
     bool invalid = m_type == Invalid || m_cost < 0 || m_volume < 0;
     return !invalid;
 }
+
+bool Transaction::operator <(const Transaction& _tr) const
+{
+    return m_cost < _tr.cost();
+}

@@ -17,6 +17,11 @@ public:
     inline qreal currentPrice() const {return m_lastDealCost;}
 
 private:
+    void insertInSortedQueue(Transaction* _transaction);
+    void deleteTransaction(Transaction* _transaction);
+    void debugReport() const;
+
+private:
     QList<Transaction*> m_buy;
     QList<Transaction*> m_sell;
 

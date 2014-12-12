@@ -20,6 +20,8 @@ public:
     inline void setVolume(qreal _volume) {m_volume = _volume;}
     inline void setType(Type _type)      {m_type = _type;}
 
+    bool operator < (const Transaction& _tr) const;
+
 private:
     qreal m_cost;
     qreal m_volume;
