@@ -19,18 +19,19 @@ TransactionProcessor::~TransactionProcessor()
 void TransactionProcessor::process(Transaction *_transaction)
 {
     QList<Transaction*> *queueToProcess;
-//    QList<Transaction*> *queueToStore;
+    bool (*comparator)(const Transaction&, const Transaction&);
 
     if(_transaction->type() == Transaction::Buy)
     {
         queueToProcess = &m_sell;
-//        queueToStore = &m_buy;
+        comparator = lessOrEqual;
     }
     else if(_transaction->type() == Transaction::Sell)
     {
         queueToProcess = &m_buy;
-//        queueToStore = &m_sell;
+        comparator = greaterOrEqual;
     }
+
     else if(_transaction->type() == Transaction::Invalid)
     {
         qDebug() << "Invalid transaction passed in " << Q_FUNC_INFO;
@@ -38,7 +39,8 @@ void TransactionProcessor::process(Transaction *_transaction)
     }
 
     // !!! It seems, that comparator function need to compare in case of buy and sell. !!!
-    while(!queueToProcess->isEmpty() && queueToProcess->first()->cost() <= _transaction->cost())
+
+    while(!queueToProcess->isEmpty() && comparator(*queueToProcess->first(), *_transaction))
     {
         qreal transationVolume = _transaction->volume();
         qreal topQueueVolume = queueToProcess->first()->volume();
@@ -47,7 +49,6 @@ void TransactionProcessor::process(Transaction *_transaction)
         {
             _transaction->setVolume(transationVolume - topQueueVolume);
             deleteTransaction(queueToProcess->first());
-            //delete queueToProcess->first();
             queueToProcess->removeFirst();
         }
         else
@@ -64,10 +65,8 @@ void TransactionProcessor::process(Transaction *_transaction)
 
     if(_transaction->volume())
         insertInSortedQueue(_transaction);
-//       *queueToStore << _transaction;
     else
         deleteTransaction(_transaction);
-//        delete _transaction;
 
     debugReport();
 }
@@ -94,16 +93,14 @@ void TransactionProcessor::insertInSortedQueue(Transaction *_transaction)
     int i = 0;
     if(_transaction->type() == Transaction::Buy)
     {
-        if(!m_buy.isEmpty())
-            while(m_buy.at(i)->cost() < _transaction->cost())
-                ++i;
+        while(m_buy.size() > i && m_buy.at(i)->cost() > _transaction->cost())
+            ++i;
         m_buy.insert(i, _transaction);
     }
     else if(_transaction->type() == Transaction::Sell)
     {
-        if(!m_sell.isEmpty())
-            while(m_sell.at(i)->cost() > _transaction->cost())
-                ++i;
+        while(m_sell.size() > i && m_sell.at(i)->cost() < _transaction->cost())
+            ++i;
         m_sell.insert(i, _transaction);
     }
 }

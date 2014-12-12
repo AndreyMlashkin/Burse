@@ -22,3 +22,20 @@ bool Transaction::operator <(const Transaction& _tr) const
 {
     return m_cost < _tr.cost();
 }
+
+bool Transaction::operator >(const Transaction &_tr) const
+{
+    return m_cost > _tr.cost();
+}
+
+
+bool lessOrEqual(const Transaction &_tr1, const Transaction &_tr2)
+{
+    return _tr1.cost() <= _tr2.cost();
+}
+
+
+bool greaterOrEqual(const Transaction &_tr1, const Transaction &_tr2)
+{
+    return _tr1.cost() >= _tr2.cost();
+}

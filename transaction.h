@@ -21,11 +21,15 @@ public:
     inline void setType(Type _type)      {m_type = _type;}
 
     bool operator < (const Transaction& _tr) const;
+    bool operator > (const Transaction& _tr) const;
 
 private:
     qreal m_cost;
     qreal m_volume;
     Type m_type;
 };
+
+bool lessOrEqual(const Transaction& _tr1, const Transaction& _tr2);
+bool greaterOrEqual(const Transaction& _tr1, const Transaction& _tr2);
 
 #endif // TRANSACTION_H
