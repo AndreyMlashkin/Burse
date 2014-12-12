@@ -13,8 +13,12 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+        transaction.cpp \
+        transactionprocessor.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+        transaction.h  \
+        transactionprocessor.h
 
 FORMS    += mainwindow.ui
