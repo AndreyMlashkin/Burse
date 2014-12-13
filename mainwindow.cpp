@@ -36,9 +36,11 @@ void MainWindow::addTransaction()
 
     m_processor->process(formTransaction());
 
-    m_plotter->graph(Cost)->addData(m_modelTime, m_processor->currentPrice());
-    m_plotter->graph(Demand)->addData(m_modelTime, m_processor->currentDemand());
-    m_plotter->graph(Offer)->addData(m_modelTime, m_processor->currentOffer());
+    Position currentPos(m_processor->currentPrice(),
+                        m_processor->currentDemand(),
+                        m_processor->currentOffer());
+    addPosition(currentPos);
+
 
     m_minDemand = qMin(m_minDemand, m_processor->currentDemand());
     m_maxOffer =  qMax(m_maxOffer, m_processor->currentOffer());
@@ -57,6 +59,13 @@ Transaction *MainWindow::formTransaction() const
         type = Transaction::Sell;
 
     return new Transaction(m_ui->cost->value(), m_ui->volume->value(), type);
+}
+
+void MainWindow::addPosition(const Position &_pos)
+{
+    m_plotter->graph(Cost)->addData(m_modelTime, _pos.cost);
+    m_plotter->graph(Demand)->addData(m_modelTime, _pos.demand);
+    m_plotter->graph(Offer)->addData(m_modelTime, _pos.offer);
 }
 
 void MainWindow::initGraphics()

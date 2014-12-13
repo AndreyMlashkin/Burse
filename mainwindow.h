@@ -24,8 +24,19 @@ private slots:
     void addTransaction();
 
 private:
-    Transaction* formTransaction() const;
 
+    struct Position
+    {
+        Position(qreal _cost, qreal _demand, qreal _offer)
+            : cost(_cost), demand(_demand), offer(_offer)
+        {}
+        qreal cost;
+        qreal demand;
+        qreal offer;
+    };
+
+    Transaction* formTransaction() const;
+    void addPosition(const Position& _pos);
     void initGraphics();
 
 private:
