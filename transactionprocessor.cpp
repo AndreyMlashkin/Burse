@@ -4,6 +4,8 @@
 #include "transactionprocessor.h"
 #include "transaction.h"
 
+#include "transactionqueuemodel.h"
+
 TransactionProcessor::TransactionProcessor()
     : m_lastDealCost(0)
 {}
@@ -66,6 +68,8 @@ void TransactionProcessor::process(Transaction *_transaction)
     else
         deleteTransaction(_transaction);
 
+    if(m_model)
+        m_model->update(m_buy, m_sell);
     debugReport();
 }
 
@@ -83,6 +87,14 @@ qreal TransactionProcessor::currentOffer() const
         return 0;
 
     return m_sell.first()->cost();
+}
+
+QAbstractItemModel *TransactionProcessor::queueModel()
+{
+    if(!m_model)
+        m_model = new TransactionQueueModel(m_buy, m_sell);
+
+    return m_model;
 }
 
 void TransactionProcessor::insertInSortedQueue(Transaction *_transaction)

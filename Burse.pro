@@ -16,12 +16,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
         transaction.cpp \
         transactionprocessor.cpp \
-        qcustomplot/qcustomplot.cpp
+        qcustomplot/qcustomplot.cpp \
+    transactionqueuemodel.cpp
 
 HEADERS  += mainwindow.h \
         transaction.h  \
         transactionprocessor.h \
         qcustomplot/qcustomplot.h \
-    bursetools.h
+    bursetools.h \
+    transactionqueuemodel.h
 
 FORMS    += mainwindow.ui
