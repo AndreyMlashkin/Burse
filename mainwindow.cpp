@@ -104,8 +104,6 @@ void MainWindow::initGraphics()
     m_plotter->graph(Offer)->setPen(graphPen);
 
     // point in time = 0
-    m_plotter->graph(Cost)->addData(0, 0);
-    m_plotter->graph(Demand)->addData(0, 0);
-    m_plotter->graph(Offer)->addData(0, 0);
-
+    Position pos(0, 0, 0);
+    addPosition(pos);
 }
