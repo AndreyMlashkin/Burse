@@ -32,6 +32,10 @@ private:
     Ui::MainWindow *m_ui;
     TransactionProcessor* m_processor;
     QCustomPlot* m_plotter;
+
+    qreal m_minDemand;
+    qreal m_maxOffer;
+    int m_modelTime;
 };
 
 #endif // MAINWINDOW_H

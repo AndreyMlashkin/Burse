@@ -21,6 +21,7 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
         transaction.h  \
         transactionprocessor.h \
-        qcustomplot/qcustomplot.h
+        qcustomplot/qcustomplot.h \
+    bursetools.h
 
 FORMS    += mainwindow.ui

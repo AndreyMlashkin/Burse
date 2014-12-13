@@ -2,15 +2,18 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "bursetools.h"
 #include "transactionprocessor.h"
 #include "transaction.h"
-
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_ui(new Ui::MainWindow),
     m_processor(new TransactionProcessor()),
-    m_plotter(new QCustomPlot())
+    m_plotter(new QCustomPlot()),
+    m_minDemand(0),
+    m_maxOffer(0),
+    m_modelTime(0)
 {    
     m_ui->setupUi(this);
     centralWidget()->layout()->addWidget(m_plotter);
@@ -28,7 +31,21 @@ MainWindow::~MainWindow()
 
 void MainWindow::addTransaction()
 {
+    const int offset = 3;
+    ++m_modelTime;
+
     m_processor->process(formTransaction());
+
+    m_plotter->graph(Cost)->addData(m_modelTime, m_processor->currentPrice());
+    m_plotter->graph(Demand)->addData(m_modelTime, m_processor->currentDemand());
+    m_plotter->graph(Offer)->addData(m_modelTime, m_processor->currentOffer());
+
+    m_minDemand = qMin(m_minDemand, m_processor->currentDemand());
+    m_maxOffer =  qMax(m_maxOffer, m_processor->currentOffer());
+
+    m_plotter->yAxis->setRange(0, m_maxOffer + offset);
+    m_plotter->xAxis->setRange(0, m_modelTime + offset);
+    m_plotter->replot();
 }
 
 Transaction *MainWindow::formTransaction() const
@@ -50,27 +67,36 @@ void MainWindow::initGraphics()
 
     m_plotter->xAxis->setLabel("Время");
     m_plotter->yAxis->setLabel("Цена");
+
+    m_plotter->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignLeft|Qt::AlignTop);
     m_plotter->legend->setVisible(true);
 
 
     QPen graphPen;
     graphPen.setColor(Qt::black);
-    graphPen.setWidthF(3);
+    graphPen.setWidthF(5);
 
     m_plotter->addGraph();
-    m_plotter->graph(0)->setLineStyle(QCPGraph::lsLine);
-    m_plotter->graph(0)->setName("Цена");
-    m_plotter->graph(0)->setPen(graphPen);
+    m_plotter->graph(Cost)->setLineStyle(QCPGraph::lsLine);
+    m_plotter->graph(Cost)->setName("Цена");
+    m_plotter->graph(Cost)->setPen(graphPen);
 
     m_plotter->addGraph();
-    graphPen.setColor(Qt::blue);
-    m_plotter->graph(1)->setLineStyle(QCPGraph::lsLine);
-    m_plotter->graph(1)->setName("Спрос");
-    m_plotter->graph(1)->setPen(graphPen);
+    graphPen.setColor(Qt::green);
+    graphPen.setWidthF(2);
+    m_plotter->graph(Demand)->setLineStyle(QCPGraph::lsLine);
+    m_plotter->graph(Demand)->setName("Спрос");
+    m_plotter->graph(Demand)->setPen(graphPen);
 
     m_plotter->addGraph();
     graphPen.setColor(Qt::red);
-    m_plotter->graph(2)->setLineStyle(QCPGraph::lsLine);
-    m_plotter->graph(2)->setName("Предложение");
-    m_plotter->graph(2)->setPen(graphPen);
+    m_plotter->graph(Offer)->setLineStyle(QCPGraph::lsLine);
+    m_plotter->graph(Offer)->setName("Предложение");
+    m_plotter->graph(Offer)->setPen(graphPen);
+
+    // point in time = 0
+    m_plotter->graph(Cost)->addData(0, 0);
+    m_plotter->graph(Demand)->addData(0, 0);
+    m_plotter->graph(Offer)->addData(0, 0);
+
 }
