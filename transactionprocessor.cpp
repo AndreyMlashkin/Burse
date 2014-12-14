@@ -68,8 +68,10 @@ void TransactionProcessor::process(Transaction *_transaction)
     else
         deleteTransaction(_transaction);
 
-    if(m_model)
-        m_model->update(m_buy, m_sell);
+    if(m_buyModel)
+        m_buyModel->update(m_buy);
+    if(m_sellModel)
+        m_sellModel->update(m_sell);
     debugReport();
 }
 
@@ -89,12 +91,20 @@ qreal TransactionProcessor::currentOffer() const
     return m_sell.first()->cost();
 }
 
-QAbstractItemModel *TransactionProcessor::queueModel()
+QAbstractItemModel *TransactionProcessor::buyModel()
 {
-    if(!m_model)
-        m_model = new TransactionQueueModel(m_buy, m_sell);
+    if(!m_buyModel)
+        m_buyModel = new TransactionQueueModel(m_buy);
 
-    return m_model;
+    return m_buyModel;
+}
+
+QAbstractItemModel *TransactionProcessor::sellModel()
+{
+    if(!m_sellModel)
+        m_sellModel = new TransactionQueueModel(m_sell);
+
+    return m_sellModel;
 }
 
 void TransactionProcessor::insertInSortedQueue(Transaction *_transaction)

@@ -20,7 +20,8 @@ public:
     qreal currentOffer() const;
     inline qreal currentPrice() const {return m_lastDealCost;}
 
-    QAbstractItemModel *queueModel();
+    QAbstractItemModel *buyModel();
+    QAbstractItemModel *sellModel();
 
 private:
     void insertInSortedQueue(Transaction* _transaction);
@@ -32,7 +33,8 @@ private:
     QList<Transaction*> m_sell;
     qreal m_lastDealCost;
 
-    QPointer <TransactionQueueModel> m_model;
+    QPointer <TransactionQueueModel> m_buyModel;
+    QPointer <TransactionQueueModel> m_sellModel;
 };
 
 #endif // TRANSACTIONPROCESSOR_H

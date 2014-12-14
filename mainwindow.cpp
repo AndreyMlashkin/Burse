@@ -18,7 +18,9 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->setupUi(this);
     centralWidget()->layout()->addWidget(m_plotter);
     m_plotter->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-    m_ui->queues->setModel(m_processor->queueModel());
+
+    m_ui->buyTable->setModel(m_processor->buyModel());
+    m_ui->sellTable->setModel(m_processor->sellModel());
 
     connect(m_ui->add, SIGNAL(clicked()), SLOT(addTransaction()));
 
