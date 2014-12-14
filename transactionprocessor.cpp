@@ -16,62 +16,68 @@ TransactionProcessor::~TransactionProcessor()
         delete t;
     foreach(Transaction* t, m_sell)
         delete t;
+    foreach(Transaction* t, m_log)
+        delete t;
 }
 
-void TransactionProcessor::process(Transaction *_transaction)
+void TransactionProcessor::insert(Transaction *_transaction)
 {
-    QList<Transaction*> *queueToProcess;
-    bool (*comparator)(const Transaction&, const Transaction&);
-
     if(_transaction->type() == Transaction::Buy)
     {
-        queueToProcess = &m_sell;
-        comparator = lessOrEqual;
+        int i = 0;
+        while(i < m_buy.size() && _transaction->cost() < m_buy[i]->cost())
+            ++i;
+        m_buy.insert(i, _transaction);
     }
     else if(_transaction->type() == Transaction::Sell)
     {
-        queueToProcess = &m_buy;
-        comparator = greaterOrEqual;
+        int i = 0;
+        while(i > m_sell.size() && _transaction->cost() > m_sell[i]->cost())
+            ++i;
+        m_sell.insert(i, _transaction);
     }
-
-    else if(_transaction->type() == Transaction::Invalid)
-    {
-        qDebug() << "Invalid transaction passed in " << Q_FUNC_INFO;
-        return;
-    }
-
-    while(!queueToProcess->isEmpty() && comparator(*queueToProcess->first(), *_transaction))
-    {
-        qreal transationVolume = _transaction->volume();
-        qreal topQueueVolume = queueToProcess->first()->volume();
-
-        if(transationVolume >= topQueueVolume)
-        {
-            _transaction->setVolume(transationVolume - topQueueVolume);
-            deleteTransaction(queueToProcess->first());
-            queueToProcess->removeFirst();
-        }
-        else
-        {
-            _transaction->setVolume(0);
-            queueToProcess->first()->setVolume(topQueueVolume - transationVolume);
-            break;
-        }
-    }
-
-    Q_ASSERT(_transaction->volume() >= 0);
-    if(!queueToProcess->isEmpty())
-        Q_ASSERT(queueToProcess->first()->volume() >= 0);
-
-    if(_transaction->volume())
-        insertInSortedQueue(_transaction);
     else
-        deleteTransaction(_transaction);
+        qDebug() << "Invalid Transaction passed in model!" << Q_FUNC_INFO;
 
-    if(m_buyModel)
-        m_buyModel->update(m_buy);
-    if(m_sellModel)
-        m_sellModel->update(m_sell);
+    updateModels();
+}
+
+void TransactionProcessor::process()
+{
+    while(!m_buy.isEmpty() && !m_sell.isEmpty())
+    {
+        Transaction* buy = m_buy.first();
+        Transaction* sell = m_sell.first();
+
+        if(buy->cost() < sell->cost())
+            break;
+
+        qreal dealCost = (buy->time() < sell->time()) ? buy->cost() : sell->cost();
+
+        Transaction* forHistory = new Transaction(dealCost, qMin(buy->volume(), sell->volume()));
+        m_log << forHistory;
+
+        if(buy->volume() < sell->volume())
+        {
+            sell->setVolume(sell->volume() - buy->volume());
+            m_buy.removeFirst();
+            delete buy;
+        }
+        else if(buy->volume() > sell->volume())
+        {
+            buy->setVolume(buy->volume() - sell->volume());
+            m_sell.removeFirst();
+            delete sell;
+        }
+        else // (buy->volume() == sell->volume())
+        {
+            m_sell.removeFirst();
+            m_buy.removeFirst();
+            delete buy;
+            delete sell;
+        }
+    }
+    updateModels();
     debugReport();
 }
 
@@ -80,7 +86,10 @@ qreal TransactionProcessor::currentDemand() const
     if(m_buy.isEmpty())
         return 0;
 
-    return m_buy.first()->cost();
+    if(m_sell.isEmpty())
+        return m_buy.first()->cost();
+
+    return qMax(m_sell.first()->cost(), m_buy.first()->cost());
 }
 
 qreal TransactionProcessor::currentOffer() const
@@ -88,7 +97,18 @@ qreal TransactionProcessor::currentOffer() const
     if(m_sell.isEmpty())
         return 0;
 
-    return m_sell.first()->cost();
+    if(m_buy.isEmpty())
+        return m_sell.first()->cost();
+
+    return qMin(m_sell.first()->cost(), m_buy.first()->cost());
+}
+
+qreal TransactionProcessor::currentPrice() const
+{
+    if(m_log.isEmpty())
+        return 0;
+
+    return m_log.first()->cost();
 }
 
 QAbstractItemModel *TransactionProcessor::buyModel()
@@ -107,27 +127,22 @@ QAbstractItemModel *TransactionProcessor::sellModel()
     return m_sellModel;
 }
 
-void TransactionProcessor::insertInSortedQueue(Transaction *_transaction)
+QAbstractItemModel *TransactionProcessor::logModel()
 {
-    // It can be optimised
-    int i = 0;
-    if(_transaction->type() == Transaction::Buy)
-    {
-        while(m_buy.size() > i && m_buy.at(i)->cost() > _transaction->cost())
-            ++i;
-        m_buy.insert(i, _transaction);
-    }
-    else if(_transaction->type() == Transaction::Sell)
-    {
-        while(m_sell.size() > i && m_sell.at(i)->cost() < _transaction->cost())
-            ++i;
-        m_sell.insert(i, _transaction);
-    }
+    if(!m_logModel)
+        m_logModel = new TransactionQueueModel(m_sell);
+
+    return m_logModel;
 }
 
-void TransactionProcessor::deleteTransaction(Transaction *_transaction)
+void TransactionProcessor::updateModels()
 {
-    m_lastDealCost = _transaction->cost();
+    if(m_buyModel)
+        m_buyModel->update(m_buy);
+    if(m_sellModel)
+        m_sellModel->update(m_sell);
+    if(m_logModel)
+        m_logModel->update(m_log);
 }
 
 void TransactionProcessor::debugReport() const

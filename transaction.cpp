@@ -6,9 +6,10 @@ Transaction::Transaction()
       m_type(Invalid)
 {}
 
-Transaction::Transaction(qreal _cost, qreal _volume, Type _type)
+Transaction::Transaction(qreal _cost, qreal _volume, int _time, Type _type)
     : m_cost(_cost),
       m_volume(_volume),
+      m_time(_time),
       m_type(_type)
 {}
 

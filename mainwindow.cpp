@@ -6,6 +6,8 @@
 #include "transactionprocessor.h"
 #include "transaction.h"
 
+const int offset = 3;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_ui(new Ui::MainWindow),
@@ -13,8 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_plotter(new QCustomPlot()),
     m_minDemand(0),
     m_maxOffer(0),
-    m_modelTime(0),
-    m_prevPos(0, 0, 0)
+    m_prevPos(0, 0, 0),
+    m_modelTime(0)
 {    
     m_ui->setupUi(this);
     centralWidget()->layout()->addWidget(m_plotter);
@@ -22,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_ui->buyTable->setModel(m_processor->buyModel());
     m_ui->sellTable->setModel(m_processor->sellModel());
+    m_ui->dealsTable->setModel(m_processor->logModel());
 
     connect(m_ui->add, SIGNAL(clicked()), SLOT(addTransaction()));
 
@@ -35,11 +38,31 @@ MainWindow::~MainWindow()
 
 void MainWindow::addTransaction()
 {
-    const int offset = 3;
-    ++m_modelTime;
+   // ++m_modelTime;
 
-    m_processor->process(formTransaction());
 
+    m_processor->insert(formTransaction());
+    m_modelTime += 0.5;
+    addPosition();
+    m_modelTime += 0.5;
+    m_processor->process();
+    addPosition();
+
+}
+
+Transaction *MainWindow::formTransaction() const
+{
+    Transaction::Type type = Transaction::Invalid;
+    if(m_ui->buy->isChecked())
+        type = Transaction::Buy;
+    else if(m_ui->sell->isChecked())
+        type = Transaction::Sell;
+
+    return new Transaction(m_ui->cost->value(), m_ui->volume->value(), m_modelTime, type);
+}
+
+void MainWindow::addPosition()
+{
     Position currentPos(m_processor->currentPrice(),
                         m_processor->currentDemand(),
                         m_processor->currentOffer());
@@ -53,17 +76,6 @@ void MainWindow::addTransaction()
     m_plotter->replot();
 }
 
-Transaction *MainWindow::formTransaction() const
-{
-    Transaction::Type type = Transaction::Invalid;
-    if(m_ui->buy->isChecked())
-        type = Transaction::Buy;
-    else if(m_ui->sell->isChecked())
-        type = Transaction::Sell;
-
-    return new Transaction(m_ui->cost->value(), m_ui->volume->value(), type);
-}
-
 void MainWindow::addPosition(Position _pos)
 {
     // if new pos coord = 0, than take old val
@@ -72,7 +84,6 @@ void MainWindow::addPosition(Position _pos)
     _pos.offer = (_pos.offer  == 0)? m_prevPos.offer  : _pos.offer;
     m_prevPos = _pos;
 
-//    m_plotter->graph(DealCost)->addData(m_modelTime, _pos.cost);
     qreal mid = (_pos.demand + _pos.offer) / 2;
     m_plotter->graph(MidCost)->addData(m_modelTime, mid);
     m_plotter->graph(Demand)->addData(m_modelTime, _pos.demand);
@@ -103,12 +114,6 @@ void MainWindow::initGraphics()
     m_plotter->graph(MidCost)->setName("Цена (средняя)");
     m_plotter->graph(MidCost)->setPen(graphPen);
 
-/*    graphPen.setStyle(Qt::SolidLine);
-    m_plotter->graph(DealCost)->setLineStyle(QCPGraph::lsLine);
-    m_plotter->graph(DealCost)->setName("Цена (сделки)");
-    m_plotter->graph(DealCost)->setPen(graphPen);
-    m_plotter->graph(DealCost)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCross, 5));
-*/
     graphPen.setColor(Qt::green);
     graphPen.setWidthF(2);
     m_plotter->graph(Demand)->setLineStyle(QCPGraph::lsLine);

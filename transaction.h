@@ -8,12 +8,13 @@ class Transaction
 public:
     enum Type {Invalid, Buy, Sell};
     Transaction();
-    Transaction(qreal _cost, qreal _volume, Type _type);
+    Transaction(qreal _cost, qreal _volume, int _time = 1, Type _type = Invalid);
 
     bool isValid() const;
 
     inline qreal cost()   const {return m_cost;}
     inline qreal volume() const {return m_volume;}
+    inline int  time()    const {return m_time;}
     inline Type type()    const {return m_type;}
 
     inline void setCost(qreal _cost)     {m_cost = _cost;}
@@ -26,6 +27,7 @@ public:
 private:
     qreal m_cost;
     qreal m_volume;
+    int m_time;
     Type m_type;
 };
 

@@ -14,27 +14,30 @@ public:
     TransactionProcessor();
     ~TransactionProcessor();
 
-    void process(Transaction* _transaction);
+    void insert(Transaction* _transaction);
+    void process();
 
     qreal currentDemand() const;
     qreal currentOffer() const;
-    inline qreal currentPrice() const {return m_lastDealCost;}
+    qreal currentPrice() const;
 
     QAbstractItemModel *buyModel();
     QAbstractItemModel *sellModel();
+    QAbstractItemModel *logModel();
 
 private:
-    void insertInSortedQueue(Transaction* _transaction);
-    void deleteTransaction(Transaction* _transaction);
+    void updateModels();
     void debugReport() const;
 
 private:
     QList<Transaction*> m_buy;
     QList<Transaction*> m_sell;
+    QList<Transaction*> m_log;
     qreal m_lastDealCost;
 
     QPointer <TransactionQueueModel> m_buyModel;
     QPointer <TransactionQueueModel> m_sellModel;
+    QPointer <TransactionQueueModel> m_logModel;
 };
 
 #endif // TRANSACTIONPROCESSOR_H
