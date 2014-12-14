@@ -2,6 +2,6 @@
 #define BURSETOOLS_H
 
 enum Operation {Buy, Sell};
-enum Graphics {Cost, Demand, Offer, GraphicsCount};
+enum Graphics {MidCost, DealCost, Demand, Offer, GraphicsCount};
 
 #endif // BURSETOOLS_H

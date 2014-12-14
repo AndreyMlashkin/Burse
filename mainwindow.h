@@ -36,7 +36,7 @@ private:
     };
 
     Transaction* formTransaction() const;
-    void addPosition(const Position& _pos);
+    void addPosition(Position _pos);
     void initGraphics();
 
 private:
@@ -46,6 +46,7 @@ private:
 
     qreal m_minDemand;
     qreal m_maxOffer;
+    Position m_prevPos;
     int m_modelTime;
 };
 
